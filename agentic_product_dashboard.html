@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Agentic Fire and Safety - Product Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            min-height: 100vh;
+            padding: 10px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .agentic-logo {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #dc2626 0%, #f97316 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .agentic-logo::after {
+            content: 'A';
+            position: absolute;
+            color: white;
+            font-weight: 900;
+            font-size: 32px;
+            font-family: 'Arial Black', sans-serif;
+        }
+
+        h1 {
+            color: #1e293b;
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            color: #64748b;
+            font-size: 11px;
+            margin-top: 3px;
+            font-weight: 500;
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .user-info {
+            text-align: right;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 13px;
+        }
+
+        .user-role {
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        .desktop-nav {
+            display: none;
+            gap: 12px;
+        }
+
+        .mobile-nav {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            width: 100%;
+            order: 3;
+        }
+
+        .nav-button {
+            padding: 10px 12px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #4a5568;
+            transition: all 0.2s;
+            text-decoration: none;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .nav-button:hover {
+            border-color: #dc2626;
+            color: #dc2626;
+        }
+
+        .nav-button.active {
+            background: linear-gradient(135deg, #dc2626 0%, #f97316 100%);
+            border-color: #dc2626;
+            color: white;
+        }
+
+        .desktop-nav .nav-button {
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+
+        .main-content {
+            background: white;
+            padding: 20px 15px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .page-header {
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .page-header h2 {
+            color: #1e293b;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .page-header p {
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.6;
+            padding: 0 10px;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .product-card {
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #dc2626 0%, #f97316 100%);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:active {
+            transform: scale(0.98);
+        }
+
+        .product-card:active::before {
+            transform: scaleX(1);
+        }
+
+        .product-card.featured {
+            border: 2px solid #dc2626;
+            background: linear-gradient(135deg, #fef2f2 0%, #fff 100%);
+        }
+
+        .product-card.featured::before {
+            transform: scaleX(1);
+        }
+
+        .featured-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(135deg, #dc2626 0%, #f97316 100%);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .product-logo-container {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 25px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .product-card:hover .product-logo-container {
+            transform: scale(1.05);
+            border-color: #cbd5e1;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+
+        .product-logo {
+            font-size: 56px;
+            filter: grayscale(0);
+        }
+
+        .product-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .product-name {
+            color: #1e293b;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .product-category {
+            color: #6366f1;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .product-description {
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.6;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .product-features {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .feature-tag {
+            padding: 5px 12px;
+            background: #f1f5f9;
+            border-radius: 20px;
+            font-size: 11px;
+            color: #475569;
+            font-weight: 600;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            background: #dcfce7;
+            color: #166534;
+            margin-top: 15px;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background: #16a34a;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .info-banner {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            padding: 30px;
+            border-radius: 16px;
+            margin-top: 40px;
+            border-left: 5px solid #3b82f6;
+        }
+
+        .info-banner h3 {
+            color: #1e40af;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-banner p {
+            color: #1e40af;
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        .cta-section {
+            text-align: center;
+            margin-top: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 16px;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #dc2626 0%, #f97316 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(220, 38, 38, 0.3);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(220, 38, 38, 0.4);
+        }
+
+        /* Mobile Menu Styles */
+        .mobile-menu-btn {
+            display: none;
+            padding: 10px 15px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #4a5568;
+        }
+
+        .mobile-nav {
+            display: none;
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .mobile-nav-item {
+            display: block;
+            padding: 12px 15px;
+            color: #4a5568;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .mobile-nav-item:hover {
+            background: #f7fafc;
+            color: #dc2626;
+        }
+
+        .mobile-nav-item.active {
+            background: linear-gradient(135deg, #dc2626 0%, #f97316 100%);
+            color: white;
+        }
+
+        @media (max-width: 1024px) {
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 20px;
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+
+            .logo-section {
+                width: 100%;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .subtitle {
+                font-size: 12px;
+            }
+
+            .user-section {
+                width: 100%;
+                justify-content: flex-end;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+                position: absolute;
+                top: 30px;
+                right: 20px;
+            }
+
+            .main-content {
+                padding: 25px 20px;
+            }
+
+            .page-header h2 {
+                font-size: 24px;
+            }
+
+            .page-header p {
+                font-size: 14px;
+            }
+
+            .products-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .info-banner {
+                padding: 20px;
+            }
+
+            .cta-section {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 15px;
+            }
+
+            .desktop-nav {
+                display: none;
+            }
+
+            .mobile-nav {
+                display: grid;
+            }
+
+            .main-content {
+                padding: 20px 15px;
+            }
+
+            .page-header h2 {
+                font-size: 22px;
+            }
+
+            .page-header p {
+                font-size: 13px;
+            }
+
+            .products-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .product-card {
+                padding: 20px;
+            }
+
+            .product-logo-container {
+                width: 80px;
+                height: 80px;
+            }
+
+            .product-logo {
+                font-size: 42px;
+            }
+
+            .featured-badge {
+                top: 10px;
+                right: 10px;
+                padding: 4px 10px;
+                font-size: 10px;
+            }
+
+            .info-banner {
+                padding: 20px 15px;
+            }
+
+            .info-banner h3 {
+                font-size: 15px;
+            }
+
+            .info-banner p {
+                font-size: 12px;
+            }
+
+            .cta-section {
+                padding: 25px 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .agentic-logo {
+                width: 45px;
+                height: 45px;
+            }
+
+            .agentic-logo::after {
+                font-size: 28px;
+            }
+
+            h1 {
+                font-size: 18px;
+            }
+
+            .subtitle {
+                font-size: 10px;
+            }
+
+            .product-logo-container {
+                width: 70px;
+                height: 70px;
+            }
+
+            .product-logo {
+                font-size: 36px;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .desktop-nav {
+                display: flex;
+            }
+
+            .mobile-nav {
+                display: none;
+            }
+
+            .header {
+                flex-wrap: nowrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <script>
+        function toggleMobileMenu() {
+            const mobileNav = document.getElementById('mobileNav');
+            if (mobileNav.style.display === 'block') {
+                mobileNav.style.display = 'none';
+            } else {
+                mobileNav.style.display = 'block';
+            }
+        }
+    </script>
+    <div class="container">
+        <div class="header">
+            <div class="logo-section">
+                <div class="agentic-logo"></div>
+                <div>
+                    <h1>Agentic Fire and Safety</h1>
+                    <div class="subtitle">Integrated Fire & Life Safety Management Platform</div>
+                </div>
+            </div>
+            <div class="desktop-nav">
+                <a href="agentic_monitoring_dashboard.html" class="nav-button">Overview</a>
+                <a href="agentic_product_dashboard.html" class="nav-button active">Products</a>
+                <a href="agentic_reports_dashboard.html" class="nav-button">Reports</a>
+                <a href="agentic_settings_dashboard.html" class="nav-button">Settings</a>
+            </div>
+            <div class="mobile-nav">
+                <a href="agentic_monitoring_dashboard.html" class="nav-button">Overview</a>
+                <a href="agentic_product_dashboard.html" class="nav-button active">Products</a>
+                <a href="agentic_reports_dashboard.html" class="nav-button">Reports</a>
+                <a href="agentic_settings_dashboard.html" class="nav-button">Settings</a>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="page-header">
+                <h2>Integrated Product Suite</h2>
+                <p>Access all your fire and life safety systems through a single, unified platform. Click on any product to view real-time monitoring data and system health.</p>
+            </div>
+
+            <div class="products-grid">
+                <!-- FireM - Featured -->
+                <div class="product-card featured" onclick="window.location.href='agentic_monitoring_dashboard.html?product=firem'">
+                    <div class="featured-badge">Platform Core</div>
+                    <div class="product-logo-container">
+                        <div class="product-logo">🔥</div>
+                    </div>
+                    <div class="product-header">
+                        <div class="product-category">IoT Fire Monitoring</div>
+                        <div class="product-name">FireM</div>
+                    </div>
+                    <div class="product-description">
+                        Advanced fire panel monitoring platform. IoT-enabled solution that interfaces with any fire panel, providing real-time cloud-based monitoring and analytics.
+                    </div>
+                    <div class="product-features">
+                        <span class="feature-tag">Vendor Agnostic</span>
+                        <span class="feature-tag">Cloud Platform</span>
+                        <span class="feature-tag">Real-Time Data</span>
+                        <span class="feature-tag">Mobile App</span>
+                    </div>
+                    <center><div class="status-badge"><span class="status-dot"></span>Active & Monitoring</div></center>
+                </div>
+
+                <!-- FireVu -->
+                <div class="product-card" onclick="window.location.href='agentic_monitoring_dashboard.html?product=firevu'">
+                    <div class="product-logo-container">
+                        <div class="product-logo">📹</div>
+                    </div>
+                    <div class="product-header">
+                        <div class="product-category">Detection Systems</div>
+                        <div class="product-name">FireVu</div>
+                    </div>
+                    <div class="product-description">
+                        Advanced video smoke and flame detection with patented VSD/VFD technology. Detects fires at source with visual verification.
+                    </div>
+                    <div class="product-features">
+                        <span class="feature-tag">Video Analytics</span>
+                        <span class="feature-tag">Visual Verification</span>
+                        <span class="feature-tag">Thermal Imaging</span>
+                    </div>
+                    <center><div class="status-badge"><span class="status-dot"></span>Active & Monitoring</div></center>
+                </div>
+
+                <!-- Paul-Tec SiteMaster 5 -->
+                <div class="product-card" onclick="window.location.href='agentic_monitoring_dashboard.html?product=sitemaster'">
+                    <div class="product-logo-container">
+                        <div class="product-logo">🛡️</div>
+                    </div>
+                    <div class="product-header">
+                        <div class="product-category">Monitoring & Security</div>
+                        <div class="product-name">SiteMaster 5</div>
+                    </div>
+                    <div class="product-description">
+                        AI-powered security and fire monitoring with RealGuard technology. Remote video guarding with certified monitoring centre.
+                    </div>
+                    <div class="product-features">
+                        <span class="feature-tag">AI Analytics</span>
+                        <span class="feature-tag">24/7 Monitoring</span>
+                        <span class="feature-tag">Remote Access</span>
+                    </div>
+                    <center><div class="status-badge"><span class="status-dot"></span>Active & Monitoring</div></center>
+                </div>
+
+                <!-- EV Fire Solutions -->
+                <div class="product-card" onclick="window.location.href='agentic_monitoring_dashboard.html?product=evfire'">
+                    <div class="product-logo-container">
+                        <div class="product-logo">⚡</div>
+                    </div>
+                    <div class="product-header">
+                        <div class="product-category">EV Safety</div>
+                        <div class="product-name">EV Fire Solutions</div>
+                    </div>
+                    <div class="product-description">
+                        Specialized lithium-ion battery fire safety equipment. Fire blankets and suppression systems for electric vehicles.
+                    </div>
+                    <div class="product-features">
+                        <span class="feature-tag">EV Protection</span>
+                        <span class="feature-tag">Li-ion Safety</span>
+                        <span class="feature-tag">Thermal Runaway</span>
+                    </div>
+                    <center><div class="status-badge"><span class="status-dot"></span>Active & Monitoring</div></center>
+                </div>
+
+                <!-- Unifire FlameRanger -->
+                <div class="product-card" onclick="window.location.href='agentic_monitoring_dashboard.html?product=unifire'">
+                    <div class="product-logo-container">
+                        <div class="product-logo">🤖</div>
+                    </div>
+                    <div class="product-header">
+                        <div class="product-category">Robotic Suppression</div>
+                        <div class="product-name">Unifire FlameRanger</div>
+                    </div>
+                    <div class="product-description">
+                        Autonomous robotic fire suppression system. Detects and suppresses fires in under 15 seconds with AI-guided precision.
+                    </div>
+                    <div class="product-features">
+                        <span class="feature-tag">Autonomous</span>
+                        <span class="feature-tag">AI-Powered</span>
+                        <span class="feature-tag">15s Response</span>
+                    </div>
+                    <center><div class="status-badge"><span class="status-dot"></span>Active & Monitoring</div></center>
+                </div>
+
+                <!-- GRAS i-Sprink -->
+                <div class="product-card" onclick="window.location.href='agentic_monitoring_dashboard.html?product=gras'">
+                    <div class="product-logo-container">
+                        <div class="product-logo">💧</div>
+                    </div>
+                    <div class="product-header">
+                        <div class="product-category">EV Suppression</div>
+                        <div class="product-name">GRAS i-Sprink</div>
+                    </div>
+                    <div class="product-description">
+                        Automated water spray system for EV charging areas. Thermal imaging fire location with targeted suppression.
+                    </div>
+                    <div class="product-features">
+                        <span class="feature-tag">EV Charging</span>
+                        <span class="feature-tag">Auto Suppression</span>
+                        <span class="feature-tag">Thermal Imaging</span>
+                    </div>
+                    <center><div class="status-badge"><span class="status-dot"></span>Active & Monitoring</div></center>
+                </div>
+
+                <!-- FISACON -->
+                <div class="product-card" onclick="window.location.href='agentic_monitoring_dashboard.html?product=fisacon'">
+                    <div class="product-logo-container">
+                        <div class="product-logo">🔍</div>
+                    </div>
+                    <div class="product-header">
+                        <div class="product-category">Detection Systems</div>
+                        <div class="product-name">FISACON</div>
+                    </div>
+                    <div class="product-description">
+                        Advanced fire detection and control systems. High-sensitivity detection for critical infrastructure protection.
+                    </div>
+                    <div class="product-features">
+                        <span class="feature-tag">Early Warning</span>
+                        <span class="feature-tag">Critical Infrastructure</span>
+                        <span class="feature-tag">Control Systems</span>
+                    </div>
+                    <center><div class="status-badge"><span class="status-dot"></span>Active & Monitoring</div></center>
+                </div>
+
+                <!-- E-Cell Guard -->
+                <div class="product-card" onclick="window.location.href='agentic_monitoring_dashboard.html?product=ecell'">
+                    <div class="product-logo-container">
+                        <div class="product-logo">🔋</div>
+                    </div>
+                    <div class="product-header">
+                        <div class="product-category">Battery Protection</div>
+                        <div class="product-name">E-Cell Guard</div>
+                    </div>
+                    <div class="product-description">
+                        Battery cell monitoring and thermal runaway protection. Real-time temperature and voltage monitoring for Li-ion batteries.
+                    </div>
+                    <div class="product-features">
+                        <span class="feature-tag">Cell Monitoring</span>
+                        <span class="feature-tag">Thermal Protection</span>
+                        <span class="feature-tag">Real-Time Data</span>
+                    </div>
+                    <center><div class="status-badge"><span class="status-dot"></span>Active & Monitoring</div></center>
+                </div>
+
+                <!-- Life Safe Technologies -->
+                <div class="product-card" onclick="window.location.href='agentic_monitoring_dashboard.html?product=lifesafe'">
+                    <div class="product-logo-container">
+                        <div class="product-logo">🚨</div>
+                    </div>
+                    <div class="product-header">
+                        <div class="product-category">Professional Systems</div>
+                        <div class="product-name">Life Safe Technologies</div>
+                    </div>
+                    <div class="product-description">
+                        Professional fire safety equipment and monitoring solutions. Comprehensive life safety systems for commercial facilities.
+                    </div>
+                    <div class="product-features">
+                        <span class="feature-tag">Professional Grade</span>
+                        <span class="feature-tag">Commercial</span>
+                        <span class="feature-tag">Compliance</span>
+                    </div>
+                    <center><div class="status-badge"><span class="status-dot"></span>Active & Monitoring</div></center>
+                </div>
+
+                <!-- EVSentry -->
+                <div class="product-card" onclick="window.location.href='agentic_monitoring_dashboard.html?product=evsentry'">
+                    <div class="product-logo-container">
+                        <div class="product-logo">👁️</div>
+                    </div>
+                    <div class="product-header">
+                        <div class="product-category">EV Monitoring</div>
+                        <div class="product-name">EVSentry</div>
+                    </div>
+                    <div class="product-description">
+                        Electric vehicle safety monitoring and alert system. Continuous monitoring of EV charging and battery conditions.
+                    </div>
+                    <div class="product-features">
+                        <span class="feature-tag">Continuous Monitoring</span>
+                        <span class="feature-tag">EV Charging</span>
+                        <span class="feature-tag">Alert System</span>
+                    </div>
+                    <center><div class="status-badge"><span class="status-dot"></span>Active & Monitoring</div></center>
+                </div>
+
+                <!-- HALO Shield -->
+                <div class="product-card" onclick="window.location.href='agentic_monitoring_dashboard.html?product=halo'">
+                    <div class="product-logo-container">
+                        <div class="product-logo">🧯</div>
+                    </div>
+                    <div class="product-header">
+                        <div class="product-category">Extinguisher Technology</div>
+                        <div class="product-name">HALO Shield</div>
+                    </div>
+                    <div class="product-description">
+                        Advanced fire extinguisher technology with smart monitoring. Next-generation portable fire suppression systems.
+                    </div>
+                    <div class="product-features">
+                        <span class="feature-tag">Smart Extinguisher</span>
+                        <span class="feature-tag">IoT Enabled</span>
+                        <span class="feature-tag">Portable</span>
+                    </div>
+                    <center><div class="status-badge"><span class="status-dot"></span>Active & Monitoring</div></center>
+                </div>
+            </div>
+
+            <div class="info-banner">
+                <h3>🔒 Secure Single Sign-On Integration</h3>
+                <p>All integrated products are accessible through secure SSO authentication. Your credentials and permissions are synchronized across all systems, providing seamless access with enterprise-grade security. Each product maintains its own specialized dashboard while being centrally managed through the Agentic platform, powered by FireM's advanced monitoring technology.</p>
+            </div>
+
+            <div class="cta-section">
+                <h3 style="color: #1e293b; margin-bottom: 15px; font-size: 22px;">Ready to view system health?</h3>
+                <p style="color: #64748b; margin-bottom: 25px;">Click any product above to access real-time monitoring and detailed analytics</p>
+                <a href="agentic_monitoring_dashboard.html" class="cta-button">View System Overview →</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

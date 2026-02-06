@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Agentic Fire and Safety - Settings</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+            padding: 10px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .agentic-icon {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #dc2626 0%, #f97316 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .agentic-icon::after {
+            content: 'A';
+            position: absolute;
+            color: white;
+            font-weight: 900;
+            font-size: 28px;
+            font-family: 'Arial Black', sans-serif;
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 11px;
+            margin-top: 3px;
+        }
+
+        .nav-buttons {
+            display: none;
+        }
+
+        .mobile-nav {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            width: 100%;
+            order: 3;
+        }
+
+        .nav-button {
+            padding: 10px 12px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #4a5568;
+            transition: all 0.2s;
+            text-decoration: none;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .nav-button:hover {
+            border-color: #dc2626;
+            color: #dc2626;
+        }
+
+        .nav-button.active {
+            background: linear-gradient(135deg, #dc2626 0%, #f97316 100%);
+            border-color: #dc2626;
+            color: white;
+        }
+
+        .settings-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .settings-sidebar {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: static;
+        }
+
+        .settings-sidebar h3 {
+            color: #1e293b;
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .sidebar-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .menu-item {
+            padding: 12px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #4a5568;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .menu-item:hover {
+            background: #f7fafc;
+            color: #dc2626;
+        }
+
+        .menu-item.active {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #dc2626;
+            font-weight: 600;
+        }
+
+        .settings-content {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .section-header {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .section-header h2 {
+            color: #1e293b;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .section-header p {
+            color: #64748b;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .settings-section {
+            margin-bottom: 40px;
+        }
+
+        .settings-section h3 {
+            color: #1e293b;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .setting-info {
+            flex: 1;
+        }
+
+        .setting-title {
+            color: #1e293b;
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .setting-description {
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .setting-control {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            width: 52px;
+            height: 28px;
+            background: #cbd5e0;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: linear-gradient(135deg, #dc2626 0%, #f97316 100%);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(24px);
+        }
+
+        /* Input Fields */
+        .input-field {
+            padding: 10px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #2d3748;
+            width: 250px;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #dc2626;
+        }
+
+        .select-field {
+            padding: 10px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #2d3748;
+            background: white;
+            cursor: pointer;
+            width: 250px;
+        }
+
+        .select-field:focus {
+            outline: none;
+            border-color: #dc2626;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #dc2626 0%, #f97316 100%);
+            border-color: #dc2626;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            border-color: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .btn-secondary:hover {
+            border-color: #cbd5e0;
+            background: #f7fafc;
+        }
+
+        .btn-danger {
+            background: white;
+            border-color: #dc2626;
+            color: #dc2626;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+            color: white;
+        }
+
+        /* User List */
+        .user-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 10px;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .user-details {
+            flex: 1;
+            margin-left: 15px;
+        }
+
+        .user-name {
+            color: #1e293b;
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .user-email {
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .user-role {
+            padding: 5px 12px;
+            background: #e0e7ff;
+            color: #4338ca;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 16px;
+        }
+
+        .icon-btn:hover {
+            border-color: #cbd5e0;
+            background: #f7fafc;
+        }
+
+        /* Integration Cards */
+        .integration-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .integration-card {
+            padding: 25px;
+            background: #f8fafc;
+            border-radius: 10px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.2s;
+        }
+
+        .integration-card:hover {
+            border-color: #cbd5e0;
+        }
+
+        .integration-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .integration-logo {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .integration-name {
+            color: #1e293b;
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .integration-description {
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-badge.connected {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-badge.disconnected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        @media (max-width: 1024px) {
+            .settings-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .settings-sidebar {
+                position: static;
+            }
+        }
+
+        /* Mobile Menu Styles */
+        .mobile-menu-btn {
+            display: none;
+            padding: 10px 15px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #4a5568;
+        }
+
+        .mobile-nav {
+            display: none;
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .mobile-nav-item {
+            display: block;
+            padding: 12px 15px;
+            color: #4a5568;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .mobile-nav-item:hover {
+            background: #f7fafc;
+            color: #dc2626;
+        }
+
+        .mobile-nav-item.active {
+            background: linear-gradient(135deg, #dc2626 0%, #f97316 100%);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 20px;
+                flex-wrap: wrap;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .subtitle {
+                font-size: 12px;
+            }
+
+            .nav-buttons {
+                display: none;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .settings-content {
+                padding: 25px 20px;
+            }
+
+            .section-header h2 {
+                font-size: 24px;
+            }
+
+            .setting-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .setting-control {
+                width: 100%;
+            }
+
+            .input-field, .select-field {
+                width: 100%;
+            }
+
+            .user-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .user-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+
+            .integration-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filters-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .section-header h2 {
+                font-size: 20px;
+            }
+
+            .section-header p {
+                font-size: 12px;
+            }
+
+            .setting-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .setting-label {
+                width: 100%;
+            }
+
+            .setting-control {
+                width: 100%;
+            }
+
+            .input-field, .select-field, .textarea-field {
+                width: 100%;
+            }
+
+            .user-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .user-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+
+            .integration-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filters-content {
+                grid-template-columns: 1fr;
+            }
+
+            .settings-sidebar {
+                position: static;
+            }
+
+            .settings-sidebar h3 {
+                font-size: 14px;
+            }
+
+            .menu-item {
+                padding: 10px 12px;
+                font-size: 13px;
+            }
+
+            .btn-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .btn-group .btn {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .agentic-icon {
+                width: 40px;
+                height: 40px;
+            }
+
+            .agentic-icon::after {
+                font-size: 24px;
+            }
+
+            h1 {
+                font-size: 18px;
+            }
+
+            .subtitle {
+                font-size: 10px;
+            }
+
+            .settings-section h3 {
+                font-size: 15px;
+            }
+
+            .btn {
+                width: 100%;
+                padding: 10px 20px;
+                font-size: 13px;
+            }
+
+            .user-avatar {
+                width: 38px;
+                height: 38px;
+                font-size: 13px;
+            }
+        }
+
+        @media (min-width: 769px) {
+            body {
+                padding: 20px;
+            }
+
+            .container {
+                max-width: 1600px;
+            }
+
+            .header {
+                padding: 25px 40px;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            h1 {
+                font-size: 32px;
+            }
+
+            .subtitle {
+                font-size: 14px;
+            }
+
+            .nav-buttons {
+                display: flex;
+                gap: 12px;
+            }
+
+            .mobile-nav {
+                display: none;
+            }
+
+            .nav-button {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+
+            .settings-layout {
+                grid-template-columns: 280px 1fr;
+                gap: 25px;
+            }
+
+            .settings-sidebar {
+                position: sticky;
+                top: 20px;
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <script>
+        function toggleMobileMenu() {
+            const mobileNav = document.getElementById('mobileNav');
+            if (mobileNav.style.display === 'block') {
+                mobileNav.style.display = 'none';
+            } else {
+                mobileNav.style.display = 'block';
+            }
+        }
+
+        function showSection(section) {
+            alert('Loading ' + section + ' settings...');
+        }
+    </script>
+    <div class="container">
+        <div class="header">
+            <div class="logo-section">
+                <div class="agentic-icon"></div>
+                <div>
+                    <h1>Agentic Settings</h1>
+                    <div class="subtitle">System Configuration & Preferences</div>
+                </div>
+            </div>
+            <div class="nav-buttons">
+                <a href="agentic_monitoring_dashboard.html" class="nav-button">Overview</a>
+                <a href="agentic_product_dashboard.html" class="nav-button">Products</a>
+                <a href="agentic_reports_dashboard.html" class="nav-button">Reports</a>
+                <a href="agentic_settings_dashboard.html" class="nav-button active">Settings</a>
+            </div>
+            <div class="mobile-nav">
+                <a href="agentic_monitoring_dashboard.html" class="nav-button">Overview</a>
+                <a href="agentic_product_dashboard.html" class="nav-button">Products</a>
+                <a href="agentic_reports_dashboard.html" class="nav-button">Reports</a>
+                <a href="agentic_settings_dashboard.html" class="nav-button active">Settings</a>
+            </div>
+        </div>
+
+        <div class="settings-layout">
+            <!-- Sidebar Menu -->
+            <div class="settings-sidebar">
+                <h3>Settings</h3>
+                <div class="sidebar-menu">
+                    <div class="menu-item active" onclick="showSection('general')">
+                        <span>⚙️</span>
+                        <span>General</span>
+                    </div>
+                    <div class="menu-item" onclick="showSection('notifications')">
+                        <span>🔔</span>
+                        <span>Notifications</span>
+                    </div>
+                    <div class="menu-item" onclick="showSection('users')">
+                        <span>👥</span>
+                        <span>Users & Access</span>
+                    </div>
+                    <div class="menu-item" onclick="showSection('sites')">
+                        <span>🏢</span>
+                        <span>Sites & Locations</span>
+                    </div>
+                    <div class="menu-item" onclick="showSection('integrations')">
+                        <span>🔌</span>
+                        <span>Integrations</span>
+                    </div>
+                    <div class="menu-item" onclick="showSection('alerts')">
+                        <span>🚨</span>
+                        <span>Alert Rules</span>
+                    </div>
+                    <div class="menu-item" onclick="showSection('api')">
+                        <span>🔑</span>
+                        <span>API & Webhooks</span>
+                    </div>
+                    <div class="menu-item" onclick="showSection('billing')">
+                        <span>💳</span>
+                        <span>Billing & Plans</span>
+                    </div>
+                    <div class="menu-item" onclick="showSection('security')">
+                        <span>🔒</span>
+                        <span>Security</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Content -->
+            <div class="settings-content">
+                <div class="section-header">
+                    <h2>General Settings</h2>
+                    <p>Configure your account preferences and system-wide settings</p>
+                </div>
+
+                <!-- Organization Settings -->
+                <div class="settings-section">
+                    <h3>🏢 Organization Information</h3>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">Organization Name</div>
+                            <div class="setting-description">The name of your organization as it appears in reports and communications</div>
+                        </div>
+                        <div class="setting-control">
+                            <input type="text" class="input-field" value="Agentic Fire and Safety" placeholder="Organization name">
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">Primary Contact Email</div>
+                            <div class="setting-description">Main contact email for system notifications and important updates</div>
+                        </div>
+                        <div class="setting-control">
+                            <input type="email" class="input-field" value="admin@agenticfire.com" placeholder="Email address">
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">Time Zone</div>
+                            <div class="setting-description">Default time zone for reports and scheduled events</div>
+                        </div>
+                        <div class="setting-control">
+                            <select class="select-field">
+                                <option selected>ACST (Adelaide, South Australia)</option>
+                                <option>AEST (Sydney, Melbourne)</option>
+                                <option>AWST (Perth)</option>
+                                <option>UTC</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">Date Format</div>
+                            <div class="setting-description">How dates are displayed throughout the system</div>
+                        </div>
+                        <div class="setting-control">
+                            <select class="select-field">
+                                <option>DD/MM/YYYY</option>
+                                <option selected>MM/DD/YYYY</option>
+                                <option>YYYY-MM-DD</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Display Settings -->
+                <div class="settings-section">
+                    <h3>🎨 Display & Interface</h3>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">Dark Mode</div>
+                            <div class="setting-description">Use dark theme for the interface (coming soon)</div>
+                        </div>
+                        <div class="setting-control">
+                            <div class="toggle-switch" onclick="this.classList.toggle('active')"></div>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">Compact View</div>
+                            <div class="setting-description">Display more information in less space</div>
+                        </div>
+                        <div class="setting-control">
+                            <div class="toggle-switch" onclick="this.classList.toggle('active')"></div>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">Show Device IDs</div>
+                            <div class="setting-description">Display technical device IDs in lists and reports</div>
+                        </div>
+                        <div class="setting-control">
+                            <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notification Preferences -->
+                <div class="settings-section">
+                    <h3>🔔 Notification Preferences</h3>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">Email Notifications</div>
+                            <div class="setting-description">Receive email alerts for critical events and system updates</div>
+                        </div>
+                        <div class="setting-control">
+                            <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">SMS Notifications</div>
+                            <div class="setting-description">Receive SMS alerts for critical alarms and emergencies</div>
+                        </div>
+                        <div class="setting-control">
+                            <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">Push Notifications</div>
+                            <div class="setting-description">Mobile app push notifications for real-time alerts</div>
+                        </div>
+                        <div class="setting-control">
+                            <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">Weekly Summary Reports</div>
+                            <div class="setting-description">Receive weekly email summary of system performance</div>
+                        </div>
+                        <div class="setting-control">
+                            <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alert Thresholds -->
+                <div class="settings-section">
+                    <h3>🚨 Alert Thresholds & Rules</h3>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">Critical Alert Threshold</div>
+                            <div class="setting-description">Number of devices in alarm state before escalation</div>
+                        </div>
+                        <div class="setting-control">
+                            <input type="number" class="input-field" value="5" style="width: 120px;">
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">Fault Notification Delay</div>
+                            <div class="setting-description">Minutes to wait before sending fault notifications</div>
+                        </div>
+                        <div class="setting-control">
+                            <input type="number" class="input-field" value="15" style="width: 120px;">
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">Auto-Escalation</div>
+                            <div class="setting-description">Automatically escalate unacknowledged critical alarms after 30 minutes</div>
+                        </div>
+                        <div class="setting-control">
+                            <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Management -->
+                <div class="settings-section">
+                    <h3>👥 User Management</h3>
+                    <div style="margin-bottom: 20px;">
+                        <button class="btn btn-primary" onclick="alert('Add new user')">+ Add New User</button>
+                    </div>
+                    
+                    <div class="user-list">
+                        <div class="user-item">
+                            <div style="display: flex; align-items: center; flex: 1;">
+                                <div class="user-avatar">AU</div>
+                                <div class="user-details">
+                                    <div class="user-name">Admin User</div>
+                                    <div class="user-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="91f0f5fcf8ffd1f0f6f4ffe5f8f2f7f8e3f4bff2fefc">[email&#160;protected]</a></div>
+                                </div>
+                            </div>
+                            <span class="user-role">Administrator</span>
+                            <div class="user-actions">
+                                <button class="icon-btn" title="Edit">✏️</button>
+                                <button class="icon-btn" title="Delete">🗑️</button>
+                            </div>
+                        </div>
+
+                        <div class="user-item">
+                            <div style="display: flex; align-items: center; flex: 1;">
+                                <div class="user-avatar" style="background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);">JS</div>
+                                <div class="user-details">
+                                    <div class="user-name">John Smith</div>
+                                    <div class="user-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="4f25202721613c22263b270f2e282a213b262c29263d2a612c2022">[email&#160;protected]</a></div>
+                                </div>
+                            </div>
+                            <span class="user-role" style="background: #fef3c7; color: #92400e;">Manager</span>
+                            <div class="user-actions">
+                                <button class="icon-btn" title="Edit">✏️</button>
+                                <button class="icon-btn" title="Delete">🗑️</button>
+                            </div>
+                        </div>
+
+                        <div class="user-item">
+                            <div style="display: flex; align-items: center; flex: 1;">
+                                <div class="user-avatar" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">ST</div>
+                                <div class="user-details">
+                                    <div class="user-name">Sarah Thompson</div>
+                                    <div class="user-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="0f7c6e7d6e67217b4f6c60617b7d6e6c7b607d216c6062">[email&#160;protected]</a></div>
+                                </div>
+                            </div>
+                            <span class="user-role" style="background: #d1fae5; color: #065f46;">Contractor</span>
+                            <div class="user-actions">
+                                <button class="icon-btn" title="Edit">✏️</button>
+                                <button class="icon-btn" title="Delete">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Integrations -->
+                <div class="settings-section">
+                    <h3>🔌 Product Integrations</h3>
+                    <div class="integration-grid">
+                        <div class="integration-card">
+                            <div class="integration-header">
+                                <div class="integration-logo">🔥</div>
+                                <span class="status-badge connected"><span class="status-dot"></span>Connected</span>
+                            </div>
+                            <div class="integration-name">FireM</div>
+                            <div class="integration-description">IoT fire panel monitoring platform - Core system integration</div>
+                            <button class="btn btn-secondary" style="width: 100%;">Configure</button>
+                        </div>
+
+                        <div class="integration-card">
+                            <div class="integration-header">
+                                <div class="integration-logo">📹</div>
+                                <span class="status-badge connected"><span class="status-dot"></span>Connected</span>
+                            </div>
+                            <div class="integration-name">FireVu</div>
+                            <div class="integration-description">Video smoke and flame detection system</div>
+                            <button class="btn btn-secondary" style="width: 100%;">Configure</button>
+                        </div>
+
+                        <div class="integration-card">
+                            <div class="integration-header">
+                                <div class="integration-logo">🛡️</div>
+                                <span class="status-badge connected"><span class="status-dot"></span>Connected</span>
+                            </div>
+                            <div class="integration-name">SiteMaster 5</div>
+                            <div class="integration-description">AI-powered security and fire monitoring</div>
+                            <button class="btn btn-secondary" style="width: 100%;">Configure</button>
+                        </div>
+
+                        <div class="integration-card">
+                            <div class="integration-header">
+                                <div class="integration-logo">⚡</div>
+                                <span class="status-badge disconnected"><span class="status-dot"></span>Not Connected</span>
+                            </div>
+                            <div class="integration-name">EV Fire Solutions</div>
+                            <div class="integration-description">Electric vehicle fire safety equipment</div>
+                            <button class="btn btn-primary" style="width: 100%;">Connect</button>
+                        </div>
+
+                        <div class="integration-card">
+                            <div class="integration-header">
+                                <div class="integration-logo">🤖</div>
+                                <span class="status-badge connected"><span class="status-dot"></span>Connected</span>
+                            </div>
+                            <div class="integration-name">Unifire FlameRanger</div>
+                            <div class="integration-description">Autonomous robotic fire suppression</div>
+                            <button class="btn btn-secondary" style="width: 100%;">Configure</button>
+                        </div>
+
+                        <div class="integration-card">
+                            <div class="integration-header">
+                                <div class="integration-logo">💧</div>
+                                <span class="status-badge connected"><span class="status-dot"></span>Connected</span>
+                            </div>
+                            <div class="integration-name">GRAS i-Sprink</div>
+                            <div class="integration-description">EV charging area fire suppression</div>
+                            <button class="btn btn-secondary" style="width: 100%;">Configure</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Save Button -->
+                <div style="display: flex; gap: 15px; padding-top: 30px; border-top: 2px solid #e2e8f0;">
+                    <button class="btn btn-primary" onclick="alert('Settings saved successfully!')">Save Changes</button>
+                    <button class="btn btn-secondary" onclick="alert('Changes discarded')">Discard Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static

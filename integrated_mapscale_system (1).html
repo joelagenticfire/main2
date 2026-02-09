@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adelaide Central Hospital - Pointr MapScale™</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f5f7fa;
+            overflow: hidden;
+        }
+
+        /* Top Navigation Bar */
+        .top-nav {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            z-index: 1000;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back-btn {
+            padding: 8px 16px;
+            background: #f3f4f6;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: #e5e7eb;
+        }
+
+        .site-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .site-subtitle {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .alarm-badge {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .alarm-pulse {
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        /* Main Layout */
+        .app-container {
+            display: flex;
+            height: calc(100vh - 68px);
+            width: 100vw;
+        }
+
+        /* Left Sidebar */
+        .sidebar {
+            width: 360px;
+            background: white;
+            border-right: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.05);
+        }
+
+        .sidebar-header {
+            padding: 24px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 12px 12px 40px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: white;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+        }
+
+        .view-mode-toggle {
+            display: flex;
+            gap: 8px;
+            background: #f3f4f6;
+            padding: 4px;
+            border-radius: 8px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .mode-btn:hover {
+            background: rgba(255,255,255,0.5);
+        }
+
+        .mode-btn.active {
+            background: white;
+            color: #3b82f6;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .floors-section {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .section-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .floor-card {
+            background: #f9fafb;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .floor-card:hover {
+            border-color: #cbd5e0;
+            transform: translateX(2px);
+        }
+
+        .floor-card.active {
+            background: #eff6ff;
+            border-color: #3b82f6;
+        }
+
+        .floor-card.has-alarm {
+            background: #fef2f2;
+            border-color: #fca5a5;
+        }
+
+        .floor-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .floor-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .alarm-dot {
+            width: 10px;
+            height: 10px;
+            background: #ef4444;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .floor-subtitle {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 12px;
+        }
+
+        .floor-stats {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        /* Map Container */
+        .map-container {
+            flex: 1;
+            position: relative;
+            background: #e8eef5;
+            overflow: hidden;
+        }
+
+        .map-canvas {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        /* Canvas for 2D/3D rendering */
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Floor Indicator */
+        .floor-indicator {
+            position: absolute;
+            top: 24px;
+            left: 24px;
+            background: white;
+            padding: 12px 20px;
+            border-radius: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-size: 14px;
+            font-weight: 600;
+            color: #111827;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        /* Map Controls */
+        .map-controls {
+            position: absolute;
+            right: 24px;
+            bottom: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 10;
+        }
+
+        .control-btn {
+            width: 48px;
+            height: 48px;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+            font-size: 20px;
+            font-weight: 600;
+            color: #374151;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .control-btn:hover {
+            background: #f9fafb;
+            transform: scale(1.05);
+        }
+
+        .control-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Legend */
+        .map-legend {
+            position: absolute;
+            bottom: 24px;
+            left: 24px;
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+            z-index: 10;
+        }
+
+        .legend-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #6b7280;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        /* Device Panel */
+        .device-panel {
+            position: absolute;
+            bottom: 0;
+            left: 360px;
+            right: 0;
+            background: white;
+            border-radius: 16px 16px 0 0;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+            padding: 24px;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+            max-height: 300px;
+        }
+
+        .device-panel.show {
+            transform: translateY(0);
+        }
+
+        .panel-handle {
+            width: 40px;
+            height: 4px;
+            background: #d1d5db;
+            border-radius: 2px;
+            margin: 0 auto 20px;
+        }
+
+        .panel-content {
+            display: flex;
+            gap: 20px;
+        }
+
+        .panel-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+
+        .panel-icon.alarm { background: #fee2e2; }
+        .panel-icon.fault { background: #fef3c7; }
+        .panel-icon.normal { background: #d1fae5; }
+
+        .panel-info {
+            flex: 1;
+        }
+
+        .panel-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+
+        .panel-subtitle {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 16px;
+        }
+
+        .panel-details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            padding: 16px 0;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .detail-label {
+            font-size: 11px;
+            color: #9ca3af;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .detail-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .status-badge.alarm { background: #fee2e2; color: #dc2626; }
+        .status-badge.fault { background: #fef3c7; color: #d97706; }
+        .status-badge.normal { background: #d1fae5; color: #059669; }
+
+        .panel-close {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #f3f4f6;
+            border-radius: 16px;
+            font-size: 18px;
+            color: #6b7280;
+            cursor: pointer;
+        }
+
+        .panel-close:hover {
+            background: #e5e7eb;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <div class="top-nav">
+        <div class="nav-left">
+            <button class="back-btn" onclick="goBackToDashboard()">
+                <span>←</span>
+                <span>Back to Dashboard</span>
+            </button>
+            <div>
+                <div class="site-title">Adelaide Central Hospital</div>
+                <div class="site-subtitle">Indoor Mapping & Device Monitoring</div>
+            </div>
+        </div>
+        <div class="nav-right">
+            <div class="alarm-badge">
+                <span class="alarm-pulse"></span>
+                <span>7 Active Alarms</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <!-- Left Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" placeholder="Search rooms, devices..." id="searchInput">
+                </div>
+
+                <div class="view-mode-toggle">
+                    <button class="mode-btn" onclick="setViewMode('2d')">2D</button>
+                    <button class="mode-btn active" onclick="setViewMode('3d')">3D</button>
+                    <button class="mode-btn" onclick="setViewMode('iso')">Iso</button>
+                </div>
+            </div>
+
+            <div class="floors-section">
+                <div class="section-label">Floors</div>
+                
+                <div class="floor-card has-alarm" onclick="selectFloor(4)">
+                    <div class="floor-header">
+                        <span class="floor-title">Floor 4</span>
+                        <span class="alarm-dot"></span>
+                    </div>
+                    <div class="floor-subtitle">ICU & Critical Care</div>
+                    <div class="floor-stats">
+                        <span>📍 8 devices</span>
+                        <span>⚠️ 3 alarms</span>
+                    </div>
+                </div>
+
+                <div class="floor-card has-alarm" onclick="selectFloor(3)">
+                    <div class="floor-header">
+                        <span class="floor-title">Floor 3</span>
+                        <span class="alarm-dot"></span>
+                    </div>
+                    <div class="floor-subtitle">Patient Wards</div>
+                    <div class="floor-stats">
+                        <span>📍 12 devices</span>
+                        <span>⚠️ 2 alarms</span>
+                    </div>
+                </div>
+
+                <div class="floor-card active" onclick="selectFloor(2)">
+                    <div class="floor-header">
+                        <span class="floor-title">Floor 2</span>
+                    </div>
+                    <div class="floor-subtitle">Surgery & Emergency</div>
+                    <div class="floor-stats">
+                        <span>📍 6 devices</span>
+                        <span>⚠️ 2 alarms</span>
+                    </div>
+                </div>
+
+                <div class="floor-card" onclick="selectFloor(1)">
+                    <div class="floor-header">
+                        <span class="floor-title">Floor 1</span>
+                    </div>
+                    <div class="floor-subtitle">Reception & Outpatient</div>
+                    <div class="floor-stats">
+                        <span>📍 10 devices</span>
+                        <span>✅ All normal</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map Container -->
+        <div class="map-container">
+            <div class="floor-indicator">
+                <span>📍</span>
+                <span id="floorName">Floor 2 - Surgery & Emergency</span>
+            </div>
+
+            <div class="map-canvas" id="mapCanvas">
+                <canvas id="mapRenderer"></canvas>
+            </div>
+
+            <!-- Map Controls -->
+            <div class="map-controls">
+                <button class="control-btn" onclick="resetView()" title="Reset View">🧭</button>
+                <button class="control-btn" onclick="zoomIn()" title="Zoom In">+</button>
+                <button class="control-btn" onclick="zoomOut()" title="Zoom Out">−</button>
+            </div>
+
+            <!-- Legend -->
+            <div class="map-legend">
+                <div class="legend-title">Device Status</div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background: #ef4444;"></div>
+                    <span>Alarm</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background: #f59e0b;"></div>
+                    <span>Fault</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background: #10b981;"></div>
+                    <span>Normal</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Device Info Panel -->
+        <div class="device-panel" id="devicePanel">
+            <div class="panel-handle"></div>
+            <button class="panel-close" onclick="closePanel()">×</button>
+            <div class="panel-content">
+                <div class="panel-icon" id="panelIcon">🔥</div>
+                <div class="panel-info">
+                    <div class="panel-title" id="panelTitle">Operating Room 1</div>
+                    <div class="panel-subtitle" id="panelSubtitle">F2-Zone1-OR1</div>
+                    <div class="panel-details">
+                        <div class="detail-item">
+                            <div class="detail-label">Device Type</div>
+                            <div class="detail-value" id="panelType">Smoke</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Device ID</div>
+                            <div class="detail-value" id="panelID">D004</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Status</div>
+                            <div class="detail-value">
+                                <span class="status-badge alarm" id="panelStatus">ALARM</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let currentView = '3d';
+        let currentFloor = 2;
+        let scale = 1;
+        let panX = 0;
+        let panY = 0;
+        let canvas, ctx;
+        let currentSite = 'Adelaide Central Hospital';
+
+        // Get site from session storage
+        window.addEventListener('load', () => {
+            const storedSite = sessionStorage.getItem('currentSite');
+            if (storedSite) {
+                currentSite = storedSite;
+                document.querySelector('.site-title').textContent = currentSite;
+            }
+            initCanvas();
+        });
+
+        const floorData = {
+            1: {
+                name: "Floor 1 - Reception & Outpatient",
+                devices: [
+                    { id: 'D001', x: 100, y: 150, room: 'Main Lobby', address: 'F1-Lobby', type: 'Smoke Detector', state: 'normal' },
+                    { id: 'D002', x: 300, y: 150, room: 'Reception', address: 'F1-Reception', type: 'Heat Detector', state: 'normal' },
+                    { id: 'D003', x: 500, y: 150, room: 'Waiting Area', address: 'F1-Waiting', type: 'Smoke Detector', state: 'normal' }
+                ]
+            },
+            2: {
+                name: "Floor 2 - Surgery & Emergency",
+                devices: [
+                    { id: 'D004', x: 150, y: 120, room: 'Operating Room 1', address: 'F2-Zone1-OR1', type: 'Manual Call Point', state: 'alarm' },
+                    { id: 'D005', x: 450, y: 120, room: 'Emergency Room', address: 'F2-Emergency', type: 'Smoke Detector', state: 'alarm' },
+                    { id: 'D010', x: 300, y: 120, room: 'Operating Room 2', address: 'F2-Zone1-OR2', type: 'Heat Detector', state: 'fault' },
+                    { id: 'D015', x: 180, y: 320, room: 'Pre-Op Area', address: 'F2-PreOp', type: 'Smoke Detector', state: 'normal' },
+                    { id: 'D011', x: 350, y: 320, room: 'Recovery 1', address: 'F2-Recovery-R1', type: 'Smoke Detector', state: 'normal' },
+                    { id: 'D019', x: 480, y: 320, room: 'Sterilization', address: 'F2-Steril', type: 'Smoke Detector', state: 'normal' }
+                ]
+            },
+            3: {
+                name: "Floor 3 - Patient Wards",
+                devices: [
+                    { id: 'D020', x: 150, y: 150, room: 'Ward A', address: 'F3-WardA', type: 'Smoke Detector', state: 'alarm' },
+                    { id: 'D021', x: 350, y: 150, room: 'Ward B', address: 'F3-WardB', type: 'Smoke Detector', state: 'alarm' },
+                    { id: 'D022', x: 250, y: 300, room: 'Nurses Station', address: 'F3-Nurses', type: 'Heat Detector', state: 'normal' }
+                ]
+            },
+            4: {
+                name: "Floor 4 - ICU & Critical Care",
+                devices: [
+                    { id: 'D030', x: 150, y: 150, room: 'ICU Room 1', address: 'F4-ICU-R1', type: 'Smoke Detector', state: 'alarm' },
+                    { id: 'D031', x: 350, y: 150, room: 'ICU Room 2', address: 'F4-ICU-R2', type: 'Smoke Detector', state: 'alarm' },
+                    { id: 'D032', x: 550, y: 150, room: 'ICU Room 3', address: 'F4-ICU-R3', type: 'Smoke Detector', state: 'alarm' },
+                    { id: 'D033', x: 250, y: 300, room: 'Critical Care', address: 'F4-Critical', type: 'Heat Detector', state: 'normal' }
+                ]
+            }
+        };
+
+        function initCanvas() {
+            canvas = document.getElementById('mapRenderer');
+            ctx = canvas.getContext('2d');
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            renderMap();
+        }
+
+        function initCanvas() {
+            canvas = document.getElementById('mapRenderer');
+            ctx = canvas.getContext('2d');
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            renderMap();
+        }
+
+        function resizeCanvas() {
+            const container = document.getElementById('mapCanvas');
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            renderMap();
+        }
+
+        function renderMap() {
+            if (!ctx) return;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Background
+            ctx.fillStyle = '#e8eef5';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.save();
+            ctx.translate(canvas.width / 2 + panX, canvas.height / 2 + panY);
+            ctx.scale(scale, scale);
+            
+            // Draw building outline
+            ctx.fillStyle = '#f7fafc';
+            ctx.strokeStyle = '#cbd5e0';
+            ctx.lineWidth = 3;
+            ctx.fillRect(-300, -200, 600, 400);
+            ctx.strokeRect(-300, -200, 600, 400);
+            
+            // Draw rooms
+            const rooms = [
+                { x: -250, y: -150, w: 150, h: 120, label: 'OR 1', color: '#fff5f5' },
+                { x: -80, y: -150, w: 150, h: 120, label: 'OR 2', color: '#fef3c7' },
+                { x: 90, y: -150, w: 160, h: 120, label: 'Emergency', color: '#fee2e2' },
+                { x: -250, y: 0, w: 500, h: 60, label: 'Corridor', color: '#e0e7ff' },
+                { x: -250, y: 80, w: 140, h: 100, label: 'Pre-Op', color: '#dbeafe' },
+                { x: -90, y: 80, w: 180, h: 100, label: 'Recovery', color: '#ddd6fe' },
+                { x: 110, y: 80, w: 140, h: 100, label: 'Sterilization', color: '#e9d5ff' }
+            ];
+            
+            rooms.forEach(room => {
+                ctx.fillStyle = room.color;
+                ctx.fillRect(room.x, room.y, room.w, room.h);
+                ctx.strokeStyle = '#cbd5e0';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(room.x, room.y, room.w, room.h);
+                
+                ctx.fillStyle = '#4a5568';
+                ctx.font = 'bold 14px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(room.label, room.x + room.w/2, room.y + room.h/2 + 5);
+            });
+            
+            // Draw devices
+            const floor = floorData[currentFloor];
+            if (floor) {
+                floor.devices.forEach(device => {
+                    const colors = {
+                        alarm: '#ef4444',
+                        fault: '#f59e0b',
+                        normal: '#10b981'
+                    };
+                    
+                    const deviceX = device.x - 300;
+                    const deviceY = device.y - 200;
+                    
+                    // Device circle
+                    ctx.fillStyle = colors[device.state];
+                    ctx.beginPath();
+                    ctx.arc(deviceX, deviceY, 12, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // White border
+                    ctx.strokeStyle = 'white';
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                    
+                    // Pulsing effect for alarms
+                    if (device.state === 'alarm') {
+                        ctx.strokeStyle = 'rgba(239, 68, 68, 0.3)';
+                        ctx.lineWidth = 6;
+                        ctx.beginPath();
+                        ctx.arc(deviceX, deviceY, 18, 0, Math.PI * 2);
+                        ctx.stroke();
+                    }
+                });
+            }
+            
+            ctx.restore();
+        }
+
+        function setViewMode(mode) {
+            currentView = mode;
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            renderMap();
+        }
+
+        function selectFloor(floor) {
+            currentFloor = floor;
+            document.querySelectorAll('.floor-card').forEach(card => card.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const floorInfo = floorData[floor];
+            if (floorInfo) {
+                document.getElementById('floorName').textContent = floorInfo.name;
+            }
+            
+            renderMap();
+        }
+
+        function zoomIn() {
+            scale = Math.min(scale * 1.3, 3);
+            renderMap();
+        }
+
+        function zoomOut() {
+            scale = Math.max(scale / 1.3, 0.5);
+            renderMap();
+        }
+
+        function resetView() {
+            scale = 1;
+            panX = 0;
+            panY = 0;
+            renderMap();
+        }
+
+        function closePanel() {
+            document.getElementById('devicePanel').classList.remove('show');
+        }
+
+        function goBackToDashboard() {
+            // Navigate back to the main dashboard
+            window.location.href = 'agentic_monitoring_dashboard.html';
+        }
+
+        // Mouse interaction
+        let isDragging = false;
+        let lastX, lastY;
+
+        canvas.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            lastX = e.clientX;
+            lastY = e.clientY;
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                panX += e.clientX - lastX;
+                panY += e.clientY - lastY;
+                lastX = e.clientX;
+                lastY = e.clientY;
+                renderMap();
+            }
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            isDragging = false;
+        });
+
+        // Click to show device info
+        canvas.addEventListener('click', (e) => {
+            if (!isDragging) {
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.clientX - rect.left - canvas.width/2 - panX) / scale;
+                const y = (e.clientY - rect.top - canvas.height/2 - panY) / scale;
+                
+                const floor = floorData[currentFloor];
+                if (floor) {
+                    floor.devices.forEach(device => {
+                        const deviceX = device.x - 300;
+                        const deviceY = device.y - 200;
+                        const dist = Math.sqrt((x - deviceX)**2 + (y - deviceY)**2);
+                        
+                        if (dist < 15) {
+                            showDevicePanel(device);
+                        }
+                    });
+                }
+            }
+        });
+
+        function showDevicePanel(device) {
+            const icons = {
+                alarm: '🔥',
+                fault: '⚠️',
+                normal: '✅'
+            };
+            
+            document.getElementById('panelIcon').textContent = icons[device.state];
+            document.getElementById('panelIcon').className = `panel-icon ${device.state}`;
+            document.getElementById('panelTitle').textContent = device.room;
+            document.getElementById('panelSubtitle').textContent = device.address;
+            document.getElementById('panelType').textContent = device.type.split(' ')[0];
+            document.getElementById('panelID').textContent = device.id;
+            document.getElementById('panelStatus').textContent = device.state.toUpperCase();
+            document.getElementById('panelStatus').className = `status-badge ${device.state}`;
+            document.getElementById('devicePanel').classList.add('show');
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            // Filter devices/rooms based on search
+            console.log('Searching for:', query);
+        });
+
+        // Initialize
+        window.addEventListener('load', initCanvas);
+    </script>
+</body>
+</html>

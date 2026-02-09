@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive 3D Hospital - Adelaide Central</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* [Previous sidebar styles remain the same - keeping all that code] */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 4px 0 20px rgba(0,0,0,0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sidebar.collapsed {
+            width: 60px;
+        }
+
+        .sidebar.expanded {
+            width: 320px;
+        }
+
+        .sidebar.hidden {
+            transform: translateX(-100%);
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 2px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .sidebar.collapsed .sidebar-header {
+            padding: 20px 10px;
+            justify-content: center;
+        }
+
+        .hospital-info {
+            flex: 1;
+        }
+
+        .sidebar.collapsed .hospital-info {
+            display: none;
+        }
+
+        .hospital-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+
+        .hospital-subtitle {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .sidebar-toggle {
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: #f3f4f6;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.2s;
+        }
+
+        .sidebar-toggle:hover {
+            background: #e5e7eb;
+            transform: scale(1.1);
+        }
+
+        .floor-list {
+            padding: 16px;
+        }
+
+        .sidebar.collapsed .floor-list {
+            padding: 10px 5px;
+        }
+
+        .floor-list-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            padding: 0 4px;
+        }
+
+        .sidebar.collapsed .floor-list-title {
+            display: none;
+        }
+
+        .floor-item {
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar.collapsed .floor-item {
+            padding: 12px 8px;
+            justify-content: center;
+        }
+
+        .floor-item:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .floor-item.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .floor-item.has-alarm {
+            border-color: #ef4444;
+            animation: pulse-border 2s infinite;
+        }
+
+        @keyframes pulse-border {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+            }
+        }
+
+        .floor-number {
+            width: 40px;
+            height: 40px;
+            background: #f3f4f6;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 700;
+            color: #4b5563;
+            flex-shrink: 0;
+        }
+
+        .floor-item.active .floor-number {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+
+        .floor-info {
+            flex: 1;
+        }
+
+        .sidebar.collapsed .floor-info {
+            display: none;
+        }
+
+        .floor-name {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .floor-stats {
+            font-size: 11px;
+            opacity: 0.8;
+        }
+
+        .controls-section {
+            padding: 16px;
+            border-top: 2px solid #e5e7eb;
+        }
+
+        .sidebar.collapsed .controls-section {
+            padding: 10px 5px;
+        }
+
+        .control-button {
+            width: 100%;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sidebar.collapsed .control-button {
+            padding: 12px;
+            justify-content: center;
+        }
+
+        .sidebar.collapsed .control-button span {
+            display: none;
+        }
+
+        .control-button:hover {
+            background: #f9fafb;
+            border-color: #cbd5e0;
+            transform: translateX(3px);
+        }
+
+        .control-button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        /* Main Container */
+        .main-container {
+            position: fixed;
+            left: 320px;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            perspective: 2000px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .main-container.sidebar-collapsed {
+            left: 60px;
+        }
+
+        .main-container.sidebar-hidden {
+            left: 0;
+        }
+
+        /* Building Wrapper */
+        .building-wrapper {
+            position: relative;
+            width: 900px;
+            height: 700px;
+            transform-style: preserve-3d;
+            transform: rotateX(60deg) rotateZ(45deg) scale(1);
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: grab;
+        }
+
+        .building-wrapper.birds-eye {
+            transform: rotateX(0deg) rotateZ(0deg) scale(1.2);
+        }
+
+        .building-wrapper.grabbing {
+            cursor: grabbing;
+        }
+
+        /* Floor Layers */
+        .floor {
+            position: absolute;
+            width: 700px;
+            height: 500px;
+            left: 50%;
+            top: 50%;
+            margin-left: -350px;
+            margin-top: -250px;
+            transform-style: preserve-3d;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: auto;
+        }
+
+        .floor:hover {
+            filter: brightness(1.05);
+        }
+
+        .floor-4 {
+            transform: translateZ(120px);
+            z-index: 4;
+        }
+
+        .floor-3 {
+            transform: translateZ(80px);
+            z-index: 3;
+        }
+
+        .floor-2 {
+            transform: translateZ(40px);
+            z-index: 2;
+        }
+
+        .floor-1 {
+            transform: translateZ(0px);
+            z-index: 1;
+        }
+
+        .floor-base {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border: 3px solid #94a3b8;
+            border-radius: 4px;
+            box-shadow: 
+                0 10px 30px rgba(0,0,0,0.3),
+                inset 0 2px 10px rgba(255,255,255,0.5);
+        }
+
+        .floor-label {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(30, 41, 59, 0.95);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 13px;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            pointer-events: none;
+        }
+
+        .floor-status {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 11px;
+            text-transform: uppercase;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            pointer-events: none;
+        }
+
+        .floor-status.alarm {
+            background: #fee2e2;
+            color: #dc2626;
+            animation: pulse 2s infinite;
+        }
+
+        .floor-status.normal {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Varied Room Shapes */
+        .room {
+            position: absolute;
+            background: white;
+            border: 2px solid #cbd5e0;
+            cursor: pointer;
+            transition: all 0.2s;
+            overflow: hidden;
+        }
+
+        .room:hover {
+            background: #eff6ff;
+            border-color: #3b82f6;
+            transform: scale(1.03);
+            z-index: 50;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .room.has-alarm {
+            background: #fee2e2;
+            border-color: #ef4444;
+            animation: pulse-room 2s infinite;
+        }
+
+        @keyframes pulse-room {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+            }
+        }
+
+        .room-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 9px;
+            font-weight: 700;
+            color: #475569;
+            text-align: center;
+            line-height: 1.2;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        .corridor {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            border-color: #94a3b8;
+        }
+
+        /* Device Markers */
+        .device {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 2px solid white;
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 10;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+        }
+
+        .device:hover {
+            transform: scale(2);
+            z-index: 200;
+        }
+
+        .device.zoomed {
+            transform: scale(4);
+            z-index: 300;
+            animation: zoom-pulse 1s ease-in-out;
+        }
+
+        @keyframes zoom-pulse {
+            0%, 100% { transform: scale(4); }
+            50% { transform: scale(4.5); }
+        }
+
+        .device.alarm {
+            background: #ef4444;
+            animation: pulse-device 1.5s infinite;
+        }
+
+        .device.fault {
+            background: #f59e0b;
+        }
+
+        .device.normal {
+            background: #10b981;
+        }
+
+        @keyframes pulse-device {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 1);
+            }
+            50% {
+                box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+            }
+        }
+
+        /* Device Tooltip */
+        .device-tooltip {
+            position: fixed;
+            background: rgba(0, 0, 0, 0.95);
+            color: white;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 11px;
+            pointer-events: none;
+            z-index: 10000;
+            display: none;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        .device-tooltip .tooltip-id {
+            font-weight: 700;
+            color: #fbbf24;
+            margin-bottom: 4px;
+        }
+
+        /* Room Detail Panel */
+        .room-panel {
+            position: fixed;
+            bottom: 0;
+            left: 320px;
+            right: 0;
+            background: white;
+            border-radius: 16px 16px 0 0;
+            padding: 24px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+            transform: translateY(100%);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 2000;
+            max-height: 50vh;
+            overflow-y: auto;
+        }
+
+        .room-panel.show {
+            transform: translateY(0);
+        }
+
+        .main-container.sidebar-collapsed .room-panel {
+            left: 60px;
+        }
+
+        .main-container.sidebar-hidden .room-panel {
+            left: 0;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .panel-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .panel-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #f3f4f6;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            color: #6b7280;
+        }
+
+        .panel-close:hover {
+            background: #e5e7eb;
+        }
+
+        .device-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .device-card {
+            background: #f9fafb;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid #e5e7eb;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .device-card:hover {
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+        }
+
+        .device-card.alarm {
+            border-color: #ef4444;
+            background: #fee2e2;
+        }
+
+        .device-id {
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 6px;
+        }
+
+        .device-type {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 6px;
+        }
+
+        .device-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .device-status.alarm { background: #dc2626; color: white; }
+        .device-status.fault { background: #f59e0b; color: white; }
+        .device-status.normal { background: #10b981; color: white; }
+
+        /* Show Sidebar Button */
+        .show-sidebar-btn {
+            position: fixed;
+            left: 20px;
+            top: 20px;
+            width: 50px;
+            height: 50px;
+            background: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: none;
+            z-index: 999;
+            transition: all 0.2s;
+        }
+
+        .show-sidebar-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .sidebar.hidden ~ .show-sidebar-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* View Mode Indicator */
+        .view-mode-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.95);
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #1f2937;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1001;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Menu -->
+    <div class="sidebar expanded" id="sidebar">
+        <div class="sidebar-header">
+            <div class="hospital-info">
+                <div class="hospital-name">🏥 Adelaide Central</div>
+                <div class="hospital-subtitle">4 Floors • 48 Devices</div>
+            </div>
+            <button class="sidebar-toggle" onclick="toggleSidebar()" title="Toggle Sidebar">☰</button>
+        </div>
+
+        <div class="floor-list">
+            <div class="floor-list-title">Floors</div>
+            
+            <div class="floor-item has-alarm" onclick="selectFloor(4)">
+                <div class="floor-number">4</div>
+                <div class="floor-info">
+                    <div class="floor-name">ICU & Critical Care</div>
+                    <div class="floor-stats">🔴 5 Alarms • 15 devices</div>
+                </div>
+            </div>
+
+            <div class="floor-item has-alarm" onclick="selectFloor(3)">
+                <div class="floor-number">3</div>
+                <div class="floor-info">
+                    <div class="floor-name">Patient Wards</div>
+                    <div class="floor-stats">🔴 3 Alarms • 12 devices</div>
+                </div>
+            </div>
+
+            <div class="floor-item active has-alarm" onclick="selectFloor(2)">
+                <div class="floor-number">2</div>
+                <div class="floor-info">
+                    <div class="floor-name">Surgery & Emergency</div>
+                    <div class="floor-stats">🔴 4 Alarms • 14 devices</div>
+                </div>
+            </div>
+
+            <div class="floor-item" onclick="selectFloor(1)">
+                <div class="floor-number">1</div>
+                <div class="floor-info">
+                    <div class="floor-name">Reception & Outpatient</div>
+                    <div class="floor-stats">✅ All Normal • 7 devices</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls-section">
+            <button class="control-button" onclick="resetView()">
+                🔄 <span>Reset View</span>
+            </button>
+            <button class="control-button" onclick="toggleViewMode()" id="viewModeBtn">
+                👁️ <span>Birds-Eye View</span>
+            </button>
+            <button class="control-button" onclick="hideSidebar()">
+                ◀️ <span>Hide Sidebar</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Show Sidebar Button -->
+    <button class="show-sidebar-btn" onclick="showSidebar()">☰</button>
+
+    <!-- View Mode Indicator -->
+    <div class="view-mode-indicator" id="viewModeIndicator">
+        🔄 Isometric View (Click map to toggle)
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container" id="mainContainer">
+        <div class="building-wrapper" id="buildingWrapper">
+            <!-- [Previous floor HTML with all rooms - keeping existing structure but I'll note that rooms should have varied sizes] -->
+            
+            <!-- Floor 4 - ICU with VARIED room sizes -->
+            <div class="floor floor-4" id="floor-4">
+                <div class="floor-base">
+                    <div class="floor-label">Floor 4 - ICU & Critical Care</div>
+                    <div class="floor-status alarm">5 ALARMS</div>
+                    
+                    <!-- ICU Rooms - VARIED sizes -->
+                    <div class="room has-alarm" style="left: 5%; top: 5%; width: 15%; height: 32%;" onclick="openRoomPanel(event, 'ICU Room 1', 4)">
+                        <div class="room-label">ICU 1</div>
+                        <div class="device alarm" style="left: 30%; top: 40%;" data-id="D030"></div>
+                        <div class="device normal" style="left: 70%; top: 60%;" data-id="D031"></div>
+                    </div>
+                    <div class="room has-alarm" style="left: 22%; top: 5%; width: 20%; height: 32%;" onclick="openRoomPanel(event, 'ICU Room 2', 4)">
+                        <div class="room-label">ICU 2</div>
+                        <div class="device alarm" style="left: 50%; top: 50%;" data-id="D032"></div>
+                        <div class="device normal" style="left: 70%; top: 30%;" data-id="D033"></div>
+                    </div>
+                    <div class="room has-alarm" style="left: 44%; top: 5%; width: 17%; height: 32%;" onclick="openRoomPanel(event, 'ICU Room 3', 4)">
+                        <div class="room-label">ICU 3</div>
+                        <div class="device alarm" style="left: 50%; top: 50%;" data-id="D034"></div>
+                        <div class="device fault" style="left: 30%; top: 70%;" data-id="D035"></div>
+                    </div>
+                    <div class="room" style="left: 63%; top: 5%; width: 20%; height: 32%;" onclick="openRoomPanel(event, 'ICU Room 4', 4)">
+                        <div class="room-label">ICU 4</div>
+                        <div class="device normal" style="left: 50%; top: 50%;" data-id="D036"></div>
+                        <div class="device normal" style="left: 70%; top: 30%;" data-id="D037"></div>
+                    </div>
+                    
+                    <!-- Corridor -->
+                    <div class="corridor" style="left: 5%; top: 39%; width: 78%; height: 6%;"></div>
+                    
+                    <!-- Critical Care & Support - VARIED -->
+                    <div class="room has-alarm" style="left: 5%; top: 47%; width: 32%; height: 26%;" onclick="openRoomPanel(event, 'Critical Care', 4)">
+                        <div class="room-label">Critical Care</div>
+                        <div class="device alarm" style="left: 35%; top: 40%;" data-id="D038"></div>
+                        <div class="device normal" style="left: 60%; top: 60%;" data-id="D039"></div>
+                        <div class="device normal" style="left: 30%; top: 70%;" data-id="D040"></div>
+                    </div>
+                    <div class="room" style="left: 39%; top: 47%; width: 18%; height: 26%;" onclick="openRoomPanel(event, 'Monitoring', 4)">
+                        <div class="room-label">Monitoring</div>
+                        <div class="device normal" style="left: 50%; top: 50%;" data-id="D041"></div>
+                    </div>
+                    <div class="room has-alarm" style="left: 59%; top: 47%; width: 24%; height: 26%;" onclick="openRoomPanel(event, 'Nurses Station', 4)">
+                        <div class="room-label">Nurses</div>
+                        <div class="device alarm" style="left: 50%; top: 50%;" data-id="D042"></div>
+                        <div class="device normal" style="left: 30%; top: 30%;" data-id="D043"></div>
+                    </div>
+                    
+                    <!-- Small rooms -->
+                    <div class="room" style="left: 5%; top: 75%; width: 14%; height: 20%;">
+                        <div class="room-label">Equipment</div>
+                        <div class="device normal" style="left: 50%; top: 50%;" data-id="D044"></div>
+                    </div>
+                    <div class="room" style="left: 21%; top: 75%; width: 12%; height: 20%;">
+                        <div class="room-label">Storage</div>
+                    </div>
+                    
+                    <!-- Stairwell -->
+                    <div class="room" style="left: 85%; top: 5%; width: 10%; height: 90%;">
+                        <div class="room-label" style="writing-mode: vertical-rl;">STAIRS</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Floor 3 - Patient Wards with VARIED rooms -->
+            <div class="floor floor-3" id="floor-3">
+                <div class="floor-base">
+                    <div class="floor-label">Floor 3 - Patient Wards</div>
+                    <div class="floor-status alarm">3 ALARMS</div>
+                    
+                    <!-- Ward A - Small rooms -->
+                    <div class="room has-alarm" style="left: 5%; top: 5%; width: 13%; height: 22%;" onclick="openRoomPanel(event, 'Ward A1', 3)">
+                        <div class="room-label">Ward A1</div>
+                        <div class="device alarm" style="left: 40%; top: 40%;" data-id="D020"></div>
+                    </div>
+                    <div class="room" style="left: 20%; top: 5%; width: 14%; height: 22%;" onclick="openRoomPanel(event, 'Ward A2', 3)">
+                        <div class="room-label">Ward A2</div>
+                        <div class="device normal" style="left: 50%; top: 50%;" data-id="D021"></div>
+                    </div>
+                    <div class="room has-alarm" style="left: 36%; top: 5%; width: 15%; height: 22%;" onclick="openRoomPanel(event, 'Ward A3', 3)">
+                        <div class="room-label">Ward A3</div>
+                        <div class="device alarm" style="left: 50%; top: 50%;" data-id="D022"></div>
+                    </div>
+                    
+                    <!-- Ward B - Different sizes -->
+                    <div class="room" style="left: 53%; top: 5%; width: 14%; height: 22%;" onclick="openRoomPanel(event, 'Ward B1', 3)">
+                        <div class="room-label">Ward B1</div>
+                        <div class="device normal" style="left: 50%; top: 50%;" data-id="D023"></div>
+                    </div>
+                    <div class="room" style="left: 69%; top: 5%; width: 14%; height: 22%;" onclick="openRoomPanel(event, 'Ward B2', 3)">
+                        <div class="room-label">Ward B2</div>
+                        <div class="device normal" style="left: 50%; top: 50%;" data-id="D024"></div>
+                    </div>
+                    
+                    <!-- Corridor -->
+                    <div class="corridor" style="left: 5%; top: 29%; width: 78%; height: 7%;"></div>
+                    
+                    <!-- Treatment & Support - Large varied rooms -->
+                    <div class="room has-alarm" style="left: 5%; top: 38%; width: 27%; height: 30%;" onclick="openRoomPanel(event, 'Treatment Room', 3)">
+                        <div class="room-label">Treatment</div>
+                        <div class="device alarm" style="left: 35%; top: 40%;" data-id="D025"></div>
+                        <div class="device normal" style="left: 65%; top: 60%;" data-id="D026"></div>
+                        <div class="device normal" style="left: 50%; top: 30%;" data-id="D027"></div>
+                    </div>
+                    <div class="room" style="left: 34%; top: 38%; width: 24%; height: 30%;" onclick="openRoomPanel(event, 'Nurses Station', 3)">
+                        <div class="room-label">Nurses</div>
+                        <div class="device normal" style="left: 50%; top: 50%;" data-id="D028"></div>
+                        <div class="device normal" style="left: 30%; top: 70%;" data-id="D029"></div>
+                    </div>
+                    <div class="room" style="left: 60%; top: 38%; width: 23%; height: 30%;" onclick="openRoomPanel(event, 'Family Room', 3)">
+                        <div class="room-label">Family Room</div>
+                        <div class="device normal" style="left: 50%; top: 50%;" data-id="D045"></div>
+                    </div>
+                    
+                    <!-- Small utility rooms -->
+                    <div class="room" style="left: 5%; top: 70%; width: 16%; height: 25%;">
+                        <div class="room-label">Utility</div>
+                        <div class="device normal" style="left: 50%; top: 50%;" data-id="D046"></div>
+                    </div>
+                    <div class="room" style="left: 23%; top: 70%; width: 14%; height: 25%;">
+                        <div class="room-label">Linen</div>
+                    </div>
+                    <div class="room" style="left: 39%; top: 70%; width: 13%; height: 25%;">
+                        <div class="room-label">Storage</div>
+                    </div>
+                    
+                    <!-- Stairwell -->
+                    <div class="room" style="left: 85%; top: 5%; width: 10%; height: 90%;">
+                        <div class="room-label" style="writing-mode: vertical-rl;">STAIRS</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Floor 2 - Surgery & Emergency with VARIED complex layout -->
+            <div class="floor floor-2" id="floor-2">
+                <div class="floor-base">
+                    <div class="floor-label">Floor 2 - Surgery & Emergency</div>
+                    <div class="floor-status alarm">4 ALARMS</div>
+                    
+                    <!-- Operating Rooms - Different sizes -->
+                    <div class="room has-alarm" style="left: 5%; top: 5%; width: 18%; height: 28%;" onclick="openRoomPanel(event, 'Operating Room 1', 2)">
+                        <div class="room-label">OR 1</div>
+                        <div class="device alarm" style="left: 40%; top: 40%;" data-id="D004"></div>
+                        <div class="device normal" style="left: 60%; top: 60%;" data-id="D047"></div>
+                        <div class="device normal" style="left: 30%; top: 70%;" data-id="D048"></div>
+                    </div>
+                    <div class="room" style="left: 25%; top: 5%; width: 21%; height: 28%;" onclick="openRoomPanel(event, 'Operating Room 2', 2)">
+                        <div class="room-label">OR 2</div>
+                        <div class="device fault" style="left: 50%; top: 50%;" data-id="D010"></div>
+                        <div class="device normal" style="left: 70%; top: 30%;" data-id="D049"></div>
+                    </div>
+                    <div class="room has-alarm" style="left: 48%; top: 5%; width: 19%; height: 28%;" onclick="openRoomPanel(event, 'Operating Room 3', 2)">
+                        <div class="room-label">OR 3</div>
+                        <div class="device alarm" style="left: 50%; top: 50%;" data-id="D005"></div>
+                        <div class="device normal" style="left: 70%; top: 30%;" data-id="D050"></div>
+                    </div>
+                    
+                    <!-- Emergency - Narrow but tall -->
+                    <div class="room has-alarm" style="left: 69%; top: 5%; width: 14%; height: 28%;" onclick="openRoomPanel(event, 'Emergency Foyer', 2)">
+                        <div class="room-label">Emergency</div>
+                        <div class="device alarm" style="left: 50%; top: 40%;" data-id="D051"></div>
+                        <div class="device alarm" style="left: 50%; top: 70%;" data-id="D052"></div>
+                    </div>
+                    
+                    <!-- Corridor -->
+                    <div class="corridor" style="left: 5%; top: 35%; width: 78%; height: 6%;"></div>
+                    
+                    <!-- Support rooms - Varied -->
+                    <div class="room" style="left: 5%; top: 43%; width: 17%; height: 24%;" onclick="openRoomPanel(event, 'Pre-Op', 2)">
+                        <div class="room-label">Pre-Op</div>
+                        <div class="device normal" style="left: 40%; top: 40%;" data-id="D015"></div>
+                        <div class="device normal" style="left: 60%; top: 60%;" data-id="D053"></div>
+                    </div>
+                    <div class="room" style="left: 24%; top: 43%; width: 14%; height: 24%;">
+                        <div class="room-label">Scrub Room</div>
+                    </div>
+                    
+                    <!-- Recovery Rooms - Different widths -->
+                    <div class="room" style="left: 40%; top: 43%; width: 20%; height: 24%;" onclick="openRoomPanel(event, 'Recovery 1', 2)">
+                        <div class="room-label">Recovery 1</div>
+                        <div class="device normal" style="left: 40%; top: 40%;" data-id="D054"></div>
+                    </div>
+                    <div class="room" style="left: 62%; top: 43%; width: 21%; height: 24%;" onclick="openRoomPanel(event, 'Recovery 2', 2)">
+                        <div class="room-label">Recovery 2</div>
+                        <div class="device normal" style="left: 50%; top: 50%;" data-id="D055"></div>
+                    </div>
+                    
+                    <!-- Bottom rooms - Mixed sizes -->
+                    <div class="room" style="left: 5%; top: 69%; width: 18%; height: 26%;" onclick="openRoomPanel(event, 'Sterilization', 2)">
+                        <div class="room-label">Sterilization</div>
+                        <div class="device normal" style="left: 50%; top: 50%;" data-id="D019"></div>
+                    </div>
+                    <div class="room" style="left: 25%; top: 69%; width: 15%; height: 26%;">
+                        <div class="room-label">Supply</div>
+                    </div>
+                    <div class="room" style="left: 42%; top: 69%; width: 17%; height: 26%;">
+                        <div class="room-label">Equipment</div>
+                    </div>
+                    <div class="room" style="left: 61%; top: 69%; width: 22%; height: 26%;">
+                        <div class="room-label">Staff Room</div>
+                    </div>
+                    
+                    <!-- Stairwell -->
+                    <div class="room" style="left: 85%; top: 5%; width: 10%; height: 90%;">
+                        <div class="room-label" style="writing-mode: vertical-rl;">STAIRS</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Floor 1 - Reception with LARGE open areas -->
+            <div class="floor floor-1" id="floor-1">
+                <div class="floor-base">
+                    <div class="floor-label">Floor 1 - Reception & Outpatient</div>
+                    <div class="floor-status normal">ALL NORMAL</div>
+                    
+                    <!-- Large Main Lobby -->
+                    <div class="room" style="left: 5%; top: 5%; width: 32%; height: 38%;" onclick="openRoomPanel(event, 'Main Lobby', 1)">
+                        <div class="room-label">MAIN LOBBY</div>
+                        <div class="device normal" style="left: 30%; top: 30%;" data-id="D001"></div>
+                        <div class="device normal" style="left: 70%; top: 70%;" data-id="D002"></div>
+                    </div>
+                    
+                    <!-- Reception area -->
+                    <div class="room" style="left: 39%; top: 5%; width: 22%; height: 19%;" onclick="openRoomPanel(event, 'Reception', 1)">
+                        <div class="room-label">Reception</div>
+                        <div class="device normal" style="left: 50%; top: 50%;" data-id="D003"></div>
+                    </div>
+                    
+                    <!-- Admin offices - Smaller -->
+                    <div class="room" style="left: 63%; top: 5%; width: 10%; height: 19%;">
+                        <div class="room-label">Admin 1</div>
+                    </div>
+                    <div class="room" style="left: 75%; top: 5%; width: 8%; height: 19%;">
+                        <div class="room-label">Admin 2</div>
+                    </div>
+                    
+                    <!-- Meeting room -->
+                    <div class="room" style="left: 39%; top: 26%; width: 17%; height: 17%;">
+                        <div class="room-label">Meeting</div>
+                    </div>
+                    
+                    <!-- Storage -->
+                    <div class="room" style="left: 58%; top: 26%; width: 12%; height: 17%;">
+                        <div class="room-label">Storage</div>
+                    </div>
+                    
+                    <!-- Corridor -->
+                    <div class="corridor" style="left: 5%; top: 45%; width: 78%; height: 6%;"></div>
+                    
+                    <!-- Large Waiting Area -->
+                    <div class="room" style="left: 5%; top: 53%; width: 36%; height: 42%;" onclick="openRoomPanel(event, 'Waiting Area', 1)">
+                        <div class="room-label">WAITING AREA</div>
+                        <div class="device normal" style="left: 40%; top: 40%;" data-id="D006"></div>
+                    </div>
+                    
+                    <!-- Outpatient Clinics - Consistent medium size -->
+                    <div class="room" style="left: 43%; top: 53%; width: 18%; height: 20%;" onclick="openRoomPanel(event, 'Clinic 1', 1)">
+                        <div class="room-label">Clinic 1</div>
+                        <div class="device normal" style="left: 50%; top: 50%;" data-id="D056"></div>
+                    </div>
+                    <div class="room" style="left: 63%; top: 53%; width: 20%; height: 20%;" onclick="openRoomPanel(event, 'Clinic 2', 1)">
+                        <div class="room-label">Clinic 2</div>
+                        <div class="device normal" style="left: 50%; top: 50%;" data-id="D057"></div>
+                    </div>
+                    
+                    <!-- Pharmacy - Larger -->
+                    <div class="room" style="left: 43%; top: 75%; width: 22%; height: 20%;" onclick="openRoomPanel(event, 'Pharmacy', 1)">
+                        <div class="room-label">Pharmacy</div>
+                        <div class="device normal" style="left: 50%; top: 50%;" data-id="D058"></div>
+                    </div>
+                    
+                    <!-- Cafe/Vending -->
+                    <div class="room" style="left: 67%; top: 75%; width: 16%; height: 20%;">
+                        <div class="room-label">Cafe</div>
+                    </div>
+                    
+                    <!-- Stairwell -->
+                    <div class="room" style="left: 85%; top: 5%; width: 10%; height: 90%;">
+                        <div class="room-label" style="writing-mode: vertical-rl;">STAIRS</div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Device Tooltip -->
+    <div class="device-tooltip" id="tooltip">
+        <div class="tooltip-id">Device D004</div>
+        <div>Status: ALARM</div>
+        <div>Type: Smoke Detector</div>
+        <div style="margin-top: 6px; font-size: 10px; opacity: 0.7;">Double-click to zoom</div>
+    </div>
+
+    <!-- Room Panel -->
+    <div class="room-panel" id="roomPanel">
+        <div class="panel-header">
+            <div class="panel-title" id="panelTitle">Operating Room 1 - Floor 2</div>
+            <button class="panel-close" onclick="closePanel()">×</button>
+        </div>
+        <div class="device-grid" id="deviceGrid">
+            <!-- Populated by JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        let sidebarState = 'expanded';
+        let currentFloor = 2;
+        let viewMode = 'isometric'; // 'isometric' or 'birds-eye'
+        let isDragging = false;
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let currentPanX = 0;
+        let currentPanY = 0;
+
+        const wrapper = document.getElementById('buildingWrapper');
+
+        // Sidebar Controls (keeping existing functions)
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContainer = document.getElementById('mainContainer');
+            
+            if (sidebarState === 'expanded') {
+                sidebar.classList.remove('expanded');
+                sidebar.classList.add('collapsed');
+                mainContainer.classList.add('sidebar-collapsed');
+                mainContainer.classList.remove('sidebar-hidden');
+                sidebarState = 'collapsed';
+            } else if (sidebarState === 'collapsed') {
+                sidebar.classList.remove('collapsed');
+                sidebar.classList.add('expanded');
+                mainContainer.classList.remove('sidebar-collapsed');
+                sidebarState = 'expanded';
+            }
+        }
+
+        function hideSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContainer = document.getElementById('mainContainer');
+            
+            sidebar.classList.add('hidden');
+            mainContainer.classList.add('sidebar-hidden');
+            mainContainer.classList.remove('sidebar-collapsed');
+            sidebarState = 'hidden';
+        }
+
+        function showSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContainer = document.getElementById('mainContainer');
+            
+            sidebar.classList.remove('hidden');
+            sidebar.classList.remove('collapsed');
+            sidebar.classList.add('expanded');
+            mainContainer.classList.remove('sidebar-hidden');
+            mainContainer.classList.remove('sidebar-collapsed');
+            sidebarState = 'expanded';
+        }
+
+        // NEW: Toggle between Isometric and Birds-Eye View
+        function toggleViewMode() {
+            viewMode = viewMode === 'isometric' ? 'birds-eye' : 'isometric';
+            
+            const btn = document.getElementById('viewModeBtn');
+            const indicator = document.getElementById('viewModeIndicator');
+            
+            if (viewMode === 'birds-eye') {
+                wrapper.classList.add('birds-eye');
+                btn.innerHTML = '🔄 <span>Isometric View</span>';
+                btn.classList.add('active');
+                indicator.textContent = '👁️ Birds-Eye View (Click map to toggle)';
+            } else {
+                wrapper.classList.remove('birds-eye');
+                btn.innerHTML = '👁️ <span>Birds-Eye View</span>';
+                btn.classList.remove('active');
+                indicator.textContent = '🔄 Isometric View (Click map to toggle)';
+            }
+        }
+
+        // NEW: Click on map to toggle view
+        wrapper.addEventListener('click', function(e) {
+            // Only toggle if clicking the wrapper itself, not a room or device
+            if (e.target === wrapper || e.target.classList.contains('floor-base')) {
+                toggleViewMode();
+            }
+        });
+
+        // NEW: Click and Drag to Pan
+        wrapper.addEventListener('mousedown', function(e) {
+            if (e.target === wrapper || e.target.classList.contains('floor-base') || e.target.classList.contains('floor')) {
+                isDragging = true;
+                dragStartX = e.clientX - currentPanX;
+                dragStartY = e.clientY - currentPanY;
+                wrapper.classList.add('grabbing');
+                e.preventDefault();
+            }
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (isDragging) {
+                currentPanX = e.clientX - dragStartX;
+                currentPanY = e.clientY - dragStartY;
+                
+                const baseTransform = viewMode === 'birds-eye' ? 
+                    'rotateX(0deg) rotateZ(0deg) scale(1.2)' : 
+                    'rotateX(60deg) rotateZ(45deg) scale(1)';
+                
+                wrapper.style.transform = `${baseTransform} translate(${currentPanX}px, ${currentPanY}px)`;
+            }
+        });
+
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+            wrapper.classList.remove('grabbing');
+        });
+
+        // NEW: Double-click Device to Zoom
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.device').forEach(device => {
+                device.addEventListener('dblclick', function(e) {
+                    e.stopPropagation();
+                    
+                    // Remove previous zoom
+                    document.querySelectorAll('.device').forEach(d => d.classList.remove('zoomed'));
+                    
+                    // Add zoom to this device
+                    this.classList.add('zoomed');
+                    
+                    // Scroll into view
+                    this.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+                    
+                    // Remove zoom after 3 seconds
+                    setTimeout(() => {
+                        this.classList.remove('zoomed');
+                    }, 3000);
+                });
+            });
+        });
+
+        // Floor Selection
+        function selectFloor(floorNum) {
+            currentFloor = floorNum;
+            
+            document.querySelectorAll('.floor-item').forEach(item => item.classList.remove('active'));
+            document.querySelectorAll('.floor-item')[4 - floorNum].classList.add('active');
+            
+            document.querySelectorAll('.floor').forEach(floor => {
+                const floorId = floor.id.replace('floor-', '');
+                if (parseInt(floorId) === floorNum) {
+                    floor.style.transform = 'translateZ(250px) scale(1.4)';
+                    floor.style.opacity = '1';
+                    floor.style.filter = 'brightness(1.1)';
+                    floor.style.zIndex = '1000';
+                } else {
+                    floor.style.transform = 'translateZ(-100px) scale(0.5)';
+                    floor.style.opacity = '0.1';
+                    floor.style.filter = 'brightness(0.3)';
+                    floor.style.pointerEvents = 'none';
+                }
+            });
+        }
+
+        function resetView() {
+            const floors = document.querySelectorAll('.floor');
+            floors.forEach(floor => {
+                const floorId = floor.id.replace('floor-', '');
+                const floorNum = parseInt(floorId);
+                const zTranslate = (floorNum - 1) * 40;
+                floor.style.transform = `translateZ(${zTranslate}px)`;
+                floor.style.opacity = '1';
+                floor.style.filter = 'brightness(1)';
+                floor.style.zIndex = floorNum;
+                floor.style.pointerEvents = 'auto';
+            });
+            
+            currentPanX = 0;
+            currentPanY = 0;
+            const baseTransform = viewMode === 'birds-eye' ? 
+                'rotateX(0deg) rotateZ(0deg) scale(1.2)' : 
+                'rotateX(60deg) rotateZ(45deg) scale(1)';
+            wrapper.style.transform = baseTransform;
+            
+            closePanel();
+        }
+
+        function openRoomPanel(event, roomName, floor) {
+            if (event) event.stopPropagation();
+            
+            const panel = document.getElementById('roomPanel');
+            const title = document.getElementById('panelTitle');
+            const grid = document.getElementById('deviceGrid');
+            
+            if (!panel || !title || !grid) return;
+            
+            title.textContent = `${roomName} - Floor ${floor}`;
+            
+            const devices = generateRoomDevices(roomName);
+            
+            grid.innerHTML = '';
+            devices.forEach(device => {
+                const card = document.createElement('div');
+                card.className = `device-card ${device.status}`;
+                card.innerHTML = `
+                    <div class="device-id">${device.id}</div>
+                    <div class="device-type">${device.type}</div>
+                    <span class="device-status ${device.status}">${device.status.toUpperCase()}</span>
+                `;
+                card.onclick = () => alert(`Opening analytics for ${device.id}`);
+                grid.appendChild(card);
+            });
+            
+            panel.classList.add('show');
+        }
+
+        function closePanel() {
+            const panel = document.getElementById('roomPanel');
+            if (panel) panel.classList.remove('show');
+        }
+
+        function generateRoomDevices(roomName) {
+            const types = ['Smoke Detector', 'Heat Detector', 'Manual Call Point', 'Beam Detector'];
+            const count = Math.floor(Math.random() * 3) + 1;
+            const devices = [];
+            
+            for (let i = 0; i < count; i++) {
+                const hasAlarm = roomName.includes('ICU') || roomName.includes('Emergency') || roomName.includes('OR');
+                devices.push({
+                    id: `D${Math.floor(Math.random() * 900) + 100}`,
+                    type: types[Math.floor(Math.random() * types.length)],
+                    status: hasAlarm && Math.random() > 0.6 ? 'alarm' : Math.random() > 0.8 ? 'fault' : 'normal'
+                });
+            }
+            return devices;
+        }
+
+        // Device Tooltips
+        document.addEventListener('DOMContentLoaded', () => {
+            const tooltip = document.getElementById('tooltip');
+            
+            document.querySelectorAll('.device').forEach(device => {
+                device.addEventListener('mouseenter', (e) => {
+                    const status = device.classList.contains('alarm') ? 'ALARM' : 
+                                 device.classList.contains('fault') ? 'FAULT' : 'NORMAL';
+                    const deviceId = device.dataset.id || 'Device';
+                    tooltip.innerHTML = `
+                        <div class="tooltip-id">${deviceId}</div>
+                        <div>Status: ${status}</div>
+                        <div style="margin-top: 6px; font-size: 10px; opacity: 0.7;">Double-click to zoom</div>
+                    `;
+                    tooltip.style.display = 'block';
+                });
+                
+                device.addEventListener('mousemove', (e) => {
+                    tooltip.style.left = (e.clientX + 15) + 'px';
+                    tooltip.style.top = (e.clientY - 10) + 'px';
+                });
+                
+                device.addEventListener('mouseleave', () => {
+                    tooltip.style.display = 'none';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
